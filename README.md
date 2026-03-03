@@ -13,41 +13,47 @@ Advanced KQL-based threat hunt and intrusion reconstruction using Microsoft Defe
 
 This repository documents a full end-to-end threat hunt investigation conducted in a simulated enterprise environment.
 
-Using Log Analytics, and Entra ID logs, I reconstructed the complete intrusion chain on the endpoint:
+Using Log Analytics, and Entra ID logs, I reconstructed the complete intrusion chain on the endpoint:`ch-ops-wks02`
 
-`ch-ops-wks02`
+## Executive Summary
 
-The investigation identified:
+During an operations activity review, I identified anomalous activity on **ch-ops-wks02** that exceeded normal CorpHealth automation behavior. 
 
-- Initial remote access
+The investigation revealed:
+
+- Suspicious remote logon activity
 - Credential file discovery
-- Local reconnaissance
-- Privilege escalation simulation
-- Defender exclusion attempt
+- Local reconnaissance execution
+- Privilege-related application events
+- Token modification activity
+- Windows Defender exclusion attempt
 - Reverse shell delivery via ngrok
-- External C2 communication
-- Persistence via Startup folder
-- Account pivoting
+- External command-and-control communication attempt
+- Persistence via Startup folder placement
+- Account pivoting to an operational service account
 
-Executive Summary
+The earliest suspicious access occurred at **2025-11-23T03:08:31.1849379Z** using account **chadmin** from IP **104.164.168.17**. 
 
-During an operations activity review, I identified activity on ch-ops-wks02 that exceeded normal CorpHealth automation behavior. The telemetry revealed script misuse, outbound beaconing, credential exposure, privilege manipulation, external payload delivery via ngrok, reverse shell activity, and persistence establishment.
+To validate geographic attribution, I queried **Entra ID SigninLogs** and extracted `LocationDetails.countryOrRegion`, `state`, and `city` for that IP. The enrichment data mapped the address to:
 
-The intrusion began with a suspicious remote logon using chadmin from 104.164.168.17 (Vietnam, Ha Noi region). The attacker accessed a credential-related file, performed reconnaissance, pivoted into the ops.maintenance account, downloaded revshell.exe, attempted outbound communication to 13.228.171.119:11746, and established Startup folder persistence.
+- **Country:** VN  
+- **State:** Ha Noi  
+- **City:** Ha Noi  
 
-This activity reflects deliberate malicious behavior rather than routine maintenance automation.
+Following initial access, the attacker:
 
----
+1. Opened the credential-related file **CH-OPS-WKS02 user-pass.txt**
+2. Executed **ipconfig.exe** for reconnaissance
+3. Generated privilege-related telemetry (ConfigAdjust + token modification)
+4. Attempted to exclude **C:\ProgramData\Corp\Ops\staging** from Defender scanning
+5. Downloaded **revshell.exe** via the ngrok domain `unresuscitating-donnette-smothery.ngrok-free.dev`
+6. Attempted outbound communication to **13.228.171.119:11746**
+7. Established persistence by copying the executable into  
+   `C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\revshell.exe`
+8. Pivoted into the **ops.maintenance** account
 
-## 🎯 Investigation Objectives
-
-- Determine whether abnormal maintenance activity was legitimate or malicious
-- Identify initial access vector
-- Reconstruct attacker timeline
-- Detect privilege manipulation
-- Confirm payload staging and execution
-- Identify persistence mechanisms
-- Attribute geographic origin of attacker IPs
+This activity chain demonstrates a structured intrusion progression: 
+Initial Access → Credential Discovery → Reconnaissance → Privilege Manipulation → Defense Evasion → Tool Transfer → C2 Attempt → Persistence → Account Pivot.
 
 ---
 
