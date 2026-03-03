@@ -65,7 +65,7 @@ Flag-by-Flag Findings (0–31)
 **What I was trying to prove:** Which workstation generated the suspicious cluster.  
 **How I approached it:** To establish scope, I reviewed the clustered telemetry and confirmed that the suspicious activity repeatedly pointed back to a single endpoint. I used the consistent device name across process, file, and network events as the anchor for the rest of the hunt.   
 **Evidence (query + results):**  
-![Flag 00 evidence](../evidence/Flag-00/evidence.png) 
+<img width="975" height="615" alt="image" src="https://github.com/user-attachments/assets/c3594aea-0943-46d8-866c-8740b4c4ccd8" />
 
 ---
 
